@@ -1,0 +1,79 @@
+databaseChangeLog:
+- changeSet:
+    id: 1720826251843-1
+    author: stephenatwell (generated)
+    changes:
+    -  sql:
+          sql:  IF OBJECT_ID('dbo.Inventory', 'U') IS NOT NULL DROP TABLE dbo.Inventory;
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            computed: false
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: PK__Inventor__3214EC27FD87BA6A
+            name: ID
+            type: int
+        - column:
+            computed: false
+            name: Name
+            type: nvarchar(50)
+        - column:
+            computed: false
+            name: Quantity
+            type: int
+        - column:
+            computed: false
+            name: WarehouseName
+            type: nvarchar(50)
+        - column:
+            computed: false
+            name: DateAdded
+            type: datetime
+        tableName: Inventory
+- changeSet:
+    id: 1720826251843-2
+    author: stephenatwell (generated)
+    changes:
+    -  sql:
+          sql:  IF OBJECT_ID('dbo.Menu', 'U') IS NOT NULL DROP TABLE dbo.Menu;
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            computed: false
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: PK__Menu__3214EC27B3CACFA1
+            name: ID
+            type: int
+        - column:
+            computed: false
+            name: Item
+            type: nvarchar(50)
+        tableName: Menu
+- changeSet:
+    id: 1720826251843-3
+    author: stephenatwell (generated)
+    changes:
+    -  sql:
+          sql:  IF OBJECT_ID('dbo.Warehouses', 'U') IS NOT NULL DROP TABLE dbo.Warehouses;
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            computed: false
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: PK__Warehous__3214EC27E991EA03
+            name: ID
+            type: int
+        - column:
+            computed: false
+            name: Location
+            type: nvarchar(50)
+        tableName: Warehouses  

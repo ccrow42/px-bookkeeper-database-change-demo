@@ -1,0 +1,5 @@
+databaseChangeLog:
+#- include:
+#    file: schema.yaml
+- includeAll:
+    path: datedchanges

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+
+  labels:
+    app: bbqinventoryapp
+  name: bbqbookeeper-web
+  namespace: bbq-bookkeeper
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: bbqinventoryapp
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: bbqinventoryapp
+    spec:
+      containers:
+      - env:
+        - name: DB_INIT_USER
+          value: sa
+        - name: DB_INIT_PASS
+          valueFrom:
+            secretKeyRef:
+              key: SA_PASSWORD
+              name: bbq-bookkeeper-secret
+        - name: DB_SERVER
+          value: mssql
+        - name: DB_PORT
+          value: "1433"
+        - name: DB_USER
+          value: porxie
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: DB_PASSWORD
+              name: bbq-bookkeeper-secret
+        image: eshanks16/bbqbookkeeper:ea26ddd # ea26ddd - old app version, 83af344 - new app version
+        imagePullPolicy: Always
+        name: bbqinventoryapp
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,154 @@
+databaseChangeLog:
+- changeSet:
+    id: 1720826251843-1
+    author: stephenatwell (generated)
+    changes:
+    -  sql:
+          sql:  IF OBJECT_ID('dbo.Inventory', 'U') IS NOT NULL DROP TABLE dbo.Inventory;
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            computed: false
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: PK__Inventor__3214EC27FD87BA6A
+            name: ID
+            type: int
+        - column:
+            computed: false
+            name: Name
+            type: nvarchar(50)
+        - column:
+            computed: false
+            name: Quantity
+            type: int
+        - column:
+            computed: false
+            name: WarehouseName
+            type: nvarchar(50)
+        - column:
+            computed: false
+            name: DateAdded
+            type: datetime
+        tableName: Inventory
+- changeSet:
+    id: 1720826251843-2
+    author: stephenatwell (generated)
+    changes:
+    -  sql:
+          sql:  IF OBJECT_ID('dbo.Menu', 'U') IS NOT NULL DROP TABLE dbo.Menu;
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            computed: false
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: PK__Menu__3214EC27B3CACFA1
+            name: ID
+            type: int
+        - column:
+            computed: false
+            name: Item
+            type: nvarchar(50)
+        tableName: Menu
+- changeSet:
+    id: 1720826251843-3
+    author: stephenatwell (generated)
+    changes:
+    -  sql:
+          sql:  IF OBJECT_ID('dbo.Warehouses', 'U') IS NOT NULL DROP TABLE dbo.Warehouses;
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            computed: false
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: PK__Warehous__3214EC27E991EA03
+            name: ID
+            type: int
+        - column:
+            computed: false
+            name: Location
+            type: nvarchar(50)
+        tableName: Warehouses        
+- changeSet:
+    id: refactor-1
+    author: stephenatwell
+    changes:
+    - addColumn:
+            tableName: Warehouses
+            columns:
+              - column:
+                  name: Name
+                  type: nvarchar(50)
+              - column:
+                  name: State
+                  type: nvarchar(50)
+    - addDefaultValue:
+            columnName: Location
+            tableName: Warehouses
+            defaultValueComputed: newId()   
+- changeSet:
+    id: refactor-1-data-migrate
+    author: stephenatwell
+    # disable transactions so that we can do small/incremental locks during the data copy.
+    runInTransaction:  false
+    changes:
+    - sql:
+            sql: |
+              CREATE TRIGGER trg_Warehouses_Location_Update
+              ON Warehouses
+              AFTER INSERT, UPDATE
+              AS 
+              BEGIN
+                  SET NOCOUNT ON;
+                  
+                  IF EXISTS (SELECT * FROM Inserted)
+                  BEGIN
+                      UPDATE Warehouses
+                      SET Name = i.Location
+                      FROM Inserted i
+                      WHERE Warehouses.ID = i.ID;
+                  END
+                  
+                  IF EXISTS (SELECT * FROM Deleted)
+                  BEGIN
+                      UPDATE Warehouses
+                      SET Name = i.Location
+                      FROM Inserted i, Deleted d
+                      WHERE Warehouses.ID = d.ID AND i.ID = d.ID;
+                  END
+              END;  
+    - sql:
+            sql: |
+              -- Begin transaction to minimize lock time
+              BEGIN TRANSACTION;
+              
+              
+              WHILE 1 = 1
+              BEGIN
+              
+                  -- Update the Name column in small batches to minimize lock time
+                  UPDATE TOP (2) Warehouses
+                  SET 
+                      Name = Location
+                  WHERE 
+                      Name IS NULL;
+                  
+                  IF @@ROWCOUNT = 0
+                      BREAK;
+              END
+              
+              -- Commit transaction
+              COMMIT TRANSACTION; 
+    rollback:
+    - sql:
+            sql: IF OBJECT_ID('dbo.trg_Warehouses_Location_Update', 'TR') IS NOT NULL DROP TRIGGER dbo.trg_Warehouses_Location_Update;
+
+
