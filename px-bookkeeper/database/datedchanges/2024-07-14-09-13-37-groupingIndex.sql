@@ -1,5 +1,5 @@
 databaseChangeLog:
--  changeSet:
+- changeSet:
     id:  createIndex-groupbyname
     author:  satwell
     changes:
@@ -12,5 +12,5 @@ databaseChangeLog:
        columns:
        - column:
           name:  WarehouseName
-       - column
+       - column:
           name:  Name
