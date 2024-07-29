@@ -2,7 +2,7 @@ databaseChangeLog:
 - changeSet:
     id: drop-primary
     author: stephenatwell
-    ignore: false
+    ignore: true
     changes:
     -  dropPrimaryKey:
         constraintName: PK__Warehous__3214EC27E991EA03
@@ -16,7 +16,7 @@ databaseChangeLog:
 - changeSet:
     id: create-new-keys
     author: stephenatwell
-    ignore: false
+    ignore: true
     changes:
     - addPrimaryKey:
         clustered:  false
