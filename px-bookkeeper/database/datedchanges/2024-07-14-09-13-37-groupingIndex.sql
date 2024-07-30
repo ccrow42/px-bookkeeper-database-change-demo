@@ -6,7 +6,6 @@ databaseChangeLog:
         - createIndex:
             tableName: Inventory
             unique: false
-            ignore: false
             indexName: idx_inventory_name_warehousename
             clustered: false
             columns:
