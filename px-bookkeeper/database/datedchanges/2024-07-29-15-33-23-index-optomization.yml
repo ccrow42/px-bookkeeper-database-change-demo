@@ -4,13 +4,6 @@ databaseChangeLog:
     author: stephenatwell
     ignore: false
     changes:
-    - addForeignKeyConstraint:
-            basetableName: Inventory
-            baseColumnNames: WarehouseName
-            constraintName:  fk_WarehouseName
-            referencedTableName: Warehouses
-            referencedColumnNames: Location
-            validate:  true
     - createIndex:
             tableName: Inventory
             unique: false
@@ -55,3 +48,10 @@ databaseChangeLog:
             columns:
               - column:
                   name: Location
+    - addForeignKeyConstraint:
+            basetableName: Inventory
+            baseColumnNames: WarehouseName
+            constraintName:  fk_WarehouseName
+            referencedTableName: Warehouses
+            referencedColumnNames: Location
+            validate:  true
