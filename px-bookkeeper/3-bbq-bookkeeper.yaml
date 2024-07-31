@@ -63,7 +63,7 @@ spec:
             port: 8080
           initialDelaySeconds: 1
           periodSeconds: 2
-        image: eshanks16/bbqbookkeeper:ea26ddd # ea26ddd - old app version, 83af344 - new app version
+        image: eshanks16/bbqbookkeeper:83af344 # ea26ddd - old app version, 83af344 - new app version
         imagePullPolicy: Always
         name: bbqinventoryapp
         ports:
