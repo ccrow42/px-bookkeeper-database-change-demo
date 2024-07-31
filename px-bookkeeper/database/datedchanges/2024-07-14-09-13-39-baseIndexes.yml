@@ -1,8 +1,37 @@
 databaseChangeLog:
 - changeSet:
+    id: drop-primary
+    author: stephenatwell
+    changes:
+    -  dropPrimaryKey:
+        constraintName: PK__Warehous__3214EC27E991EA03
+        dropIndex: true
+        tableName:  Warehouses
+    rollback: 
+    -  addPrimaryKey:
+        constraintName: PK__Warehous__3214EC27E991EA03
+        columnNames: ID
+        tableName:  Warehouses  
+- changeSet:
+    id: create-new-keys
+    author: stephenatwell
+    changes:
+    - addPrimaryKey:
+        clustered:  false
+        columnNames:  Location
+        constraintName:  pk_location
+        tableName:  Warehouses
+        validate:  true
+    - addForeignKeyConstraint:
+            basetableName: Inventory
+            baseColumnNames: WarehouseName
+            constraintName:  fk_WarehouseName
+            referencedTableName: Warehouses
+            referencedColumnNames: Location
+            validate:  true
+- changeSet:
     id: create-base-indexes
     author: stephenatwell
-    ignore: true
     changes:
     - createIndex:
             tableName: Inventory
