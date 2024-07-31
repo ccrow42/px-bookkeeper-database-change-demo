@@ -2,7 +2,7 @@ databaseChangeLog:
 - changeSet:
     id: refactor-1
     author: stephenatwell
-    ignore: true
+    ignore: false
     changes:
     - addColumn:
             tableName: Warehouses
@@ -27,7 +27,7 @@ databaseChangeLog:
 - changeSet:
     id: refactor-1-data-migrate
     author: stephenatwell
-    ignore: true
+    ignore: false
     # disable transactions so that we can do small/incremental locks during the data copy.
     runInTransaction:  false
     changes:
@@ -76,7 +76,7 @@ databaseChangeLog:
 - changeSet:
     id: boston-georgia
     author: stephenatwell
-    ignore: true
+    ignore: false
     preConditions:
        - onFail: MARK_RAN
        - sqlCheck:
