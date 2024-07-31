@@ -1,0 +1,44 @@
+databaseChangeLog:
+- changeSet:
+    id: create-base-indexes
+    author: stephenatwell
+    ignore: true
+    changes:
+    - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_warehousename
+            clustered: false
+            columns:
+              - column:
+                  name: WarehouseName
+    - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_quantity
+            clustered: false
+            columns:
+              - column:
+                  name: Quantity
+    - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_quantity_name
+            clustered: false
+            columns:
+              - column:
+                  name: Name
+              - column:
+                  name: Quantity
+    - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_warehousename_quantity_name
+            clustered: false
+            columns:
+              - column:
+                  name: WarehouseName
+              - column:
+                  name: Name
+              - column:
+                  name: Quantity
