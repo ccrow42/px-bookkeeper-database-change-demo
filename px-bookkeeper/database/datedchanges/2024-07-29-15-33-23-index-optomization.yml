@@ -54,15 +54,39 @@ databaseChangeLog:
             clustered: false
             columns:
               - column:
+                  name: Name
+              - column:
                   name: Quantity
+    - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_warehousename_quantity_name
+            clustered: false
+            columns:
+              - column:
+                  name: WarehouseName
               - column:
                   name: Name
+              - column:
+                  name: Quantity
     - createIndex:
             tableName: Warehouses
             unique: false
             indexName: idx_warehouses_city_state
             clustered: false
             columns:
+              - column:
+                  name: City
+              - column:
+                  name: State
+    - createIndex:
+            tableName: Warehouses
+            unique: false
+            indexName: idx_warehouses_city_state
+            clustered: false
+            columns:
+              - column:
+                  name: Location
               - column:
                   name: City
               - column:
