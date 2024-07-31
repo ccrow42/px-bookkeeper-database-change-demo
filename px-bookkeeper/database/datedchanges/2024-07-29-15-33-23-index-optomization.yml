@@ -30,4 +30,30 @@ databaseChangeLog:
             constraintName:  fk_WarehouseName
             referencedTableName: Warehouses
             referencedColumnNames: Location
-            validate:  true
+            validate:  truedatabaseChangeLog:
+    - changeSet:
+      id: createIndex-idx_inventory_warehousename
+      author: satwell
+      changes:
+        - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_warehousename
+            clustered: false
+            columns:
+              - column:
+                  name: WarehouseName
+    - changeSet:
+      id: createIndex-idx_warehouse_city_state
+      author: satwell
+      changes:
+        - createIndex:
+            tableName: Warehouses
+            unique: false
+            indexName: idx_inventory_warehousename
+            clustered: false
+            columns:
+              - column:
+                  name: City
+              - column:
+                  name: State
