@@ -82,7 +82,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Warehouses
             unique: false
-            indexName: idx_warehouses_city_state
+            indexName: idx_warehouses_location_city_state
             clustered: false
             columns:
               - column:
