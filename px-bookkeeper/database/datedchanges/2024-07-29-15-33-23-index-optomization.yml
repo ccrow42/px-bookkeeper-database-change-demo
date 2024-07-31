@@ -50,7 +50,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Inventory
             unique: false
-            indexName: idx_inventory_quantity
+            indexName: idx_inventory_quantity_name
             clustered: false
             columns:
               - column:
