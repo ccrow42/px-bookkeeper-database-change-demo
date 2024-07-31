@@ -16,6 +16,13 @@ databaseChangeLog:
     id: create-new-keys
     author: stephenatwell
     changes:
+    -  addNotNullConstraint:
+        columnName:  Location
+        columnDataType: nvarchar(50)
+        constraintName:  location_non_nullable
+        defaultNullValue:  newId()
+        tableName:  Warehouses
+        validate:  true
     - addPrimaryKey:
         clustered:  false
         columnNames:  Location
