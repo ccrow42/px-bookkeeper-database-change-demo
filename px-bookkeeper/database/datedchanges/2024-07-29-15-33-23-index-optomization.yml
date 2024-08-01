@@ -36,9 +36,9 @@ databaseChangeLog:
         tableName:  Warehouses
         validate:  true
     - addPrimaryKey:
-        clustered:  false
+        clustered:  true
         columnNames:  Location
-        constraintName:  pk_location
+        constraintName:  pk_warehouse_location
         tableName:  Warehouses
         validate:  true
     - addForeignKeyConstraint:
@@ -100,7 +100,7 @@ databaseChangeLog:
             tableName: Warehouses
             unique: false
             indexName: idx_warehouses_location_city_state
-            clustered: true
+            clustered: false
             columns:
               - column:
                   name: Location
@@ -108,12 +108,4 @@ databaseChangeLog:
                   name: City
               - column:
                   name: State
-    - createIndex:
-            tableName: Warehouses
-            unique: false
-            indexName: idx_warehouses_location
-            clustered: false
-            columns:
-              - column:
-                  name: Location
 
