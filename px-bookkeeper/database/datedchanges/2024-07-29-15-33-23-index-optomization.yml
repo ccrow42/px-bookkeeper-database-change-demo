@@ -48,16 +48,24 @@ databaseChangeLog:
                   name: WarehouseName
     - createIndex:
             tableName: Inventory
-            unique: false
             indexName: idx_warehousename_quantity_name
             clustered: false
-            unique: true
-            associatedWith: primaryKey
             columns:
-              - column:
-                  name: WarehouseName
               - column:
                   name: Name
               - column:
                   name: Quantity
+              - column:
+                  name: WarehouseName
+    - createIndex:
+            tableName: Warehouses
+            indexName: idx_location_city_state
+            clustered: false
+            columns:
+              - column:
+                  name: Location
+              - column:
+                  name: City
+              - column:
+                  name: State
 
