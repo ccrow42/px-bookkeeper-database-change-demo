@@ -21,7 +21,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Inventory
             unique: false
-            indexName: idx_inventory_name_warehousename
+            indexName: idx_name_warehousename
             clustered: false
             columns:
               - column:
@@ -38,7 +38,7 @@ databaseChangeLog:
     - addPrimaryKey:
         clustered:  false
         columnNames:  Location
-        constraintName:  pk_warehouse_location
+        constraintName:  pk_location
         tableName:  Warehouses
         validate:  true
     - addForeignKeyConstraint:
@@ -51,7 +51,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Inventory
             unique: false
-            indexName: idx_inventory_warehousename
+            indexName: idx_warehousename
             clustered: false
             columns:
               - column:
@@ -59,7 +59,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Inventory
             unique: false
-            indexName: idx_inventory_quantity
+            indexName: idx_quantity
             clustered: false
             columns:
               - column:
@@ -67,7 +67,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Inventory
             unique: false
-            indexName: idx_inventory_quantity_name
+            indexName: idx_quantity_name
             clustered: false
             columns:
               - column:
@@ -77,7 +77,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Inventory
             unique: false
-            indexName: idx_inventory_warehousename_quantity_name
+            indexName: idx_warehousename_quantity_name
             clustered: false
             columns:
               - column:
@@ -89,7 +89,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Warehouses
             unique: false
-            indexName: idx_warehouses_city_state
+            indexName: idx_city_state
             clustered: false
             columns:
               - column:
@@ -99,7 +99,7 @@ databaseChangeLog:
     - createIndex:
             tableName: Warehouses
             unique: false
-            indexName: idx_warehouses_location_city_state
+            indexName: idx_location_city_state
             clustered: true
             columns:
               - column:
