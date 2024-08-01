@@ -18,6 +18,16 @@ databaseChangeLog:
     ignore: true
     author: stephenatwell
     changes:
+    - createIndex:
+            tableName: Inventory
+            unique: false
+            indexName: idx_inventory_name_warehousename
+            clustered: false
+            columns:
+              - column:
+                  name: WarehouseName
+              - column:
+                  name: Name
     -  addNotNullConstraint:
         columnName:  Location
         columnDataType: nvarchar(50)
