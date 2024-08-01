@@ -8,11 +8,20 @@ databaseChangeLog:
         constraintName: PK__Warehous__3214EC27E991EA03
         dropIndex: true
         tableName:  Warehouses
+    - dropIndex:
+        indexName: PK__Inventor__3214EC27FD87BA6A
+        tableName: Inventory
     rollback: 
     -  addPrimaryKey:
         constraintName: PK__Warehous__3214EC27E991EA03
         columnNames: ID
         tableName:  Warehouses  
+    - createIndex:
+        indexName: PK__Inventor__3214EC27FD87BA6A
+        tableName: Inventory
+        clustered: true
+        unique: true
+        associatedWith: primaryKey
 - changeSet:
     id: create-new-keys
     ignore: false
@@ -36,7 +45,7 @@ databaseChangeLog:
         tableName:  Warehouses
         validate:  true
     - addPrimaryKey:
-        clustered:  false
+        clustered:  true
         columnNames:  Location
         constraintName:  pk_location
         tableName:  Warehouses
@@ -78,7 +87,9 @@ databaseChangeLog:
             tableName: Inventory
             unique: false
             indexName: idx_warehousename_quantity_name
-            clustered: false
+            clustered: true
+            unique: true
+            associatedWith: primaryKey
             columns:
               - column:
                   name: WarehouseName
@@ -86,26 +97,4 @@ databaseChangeLog:
                   name: Name
               - column:
                   name: Quantity
-    - createIndex:
-            tableName: Warehouses
-            unique: false
-            indexName: idx_city_state
-            clustered: false
-            columns:
-              - column:
-                  name: City
-              - column:
-                  name: State
-    - createIndex:
-            tableName: Warehouses
-            unique: false
-            indexName: idx_location_city_state
-            clustered: true
-            columns:
-              - column:
-                  name: Location
-              - column:
-                  name: City
-              - column:
-                  name: State
 
