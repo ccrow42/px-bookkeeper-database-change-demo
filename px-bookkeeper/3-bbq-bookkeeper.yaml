@@ -32,11 +32,7 @@ spec:
           - |
             while true; do
               curl -s localhost:8080/inventory-by-location?location=Seattle > /dev/null
-              if [ $? -eq 0 ]; then
-                echo "Successfully accessed localhost:8080"
-              else
-                echo "Failed to access localhost:8080"
-              fi
+              sleep 0.5
             done
       - env:
         - name: DB_INIT_USER
@@ -63,7 +59,7 @@ spec:
             port: 8080
           initialDelaySeconds: 1
           periodSeconds: 2
-        image: eshanks16/bbqbookkeeper:83af344 # ea26ddd - old app version, 83af344 - new app version
+        image: eshanks16/bbqbookkeeper:ea26ddd # ea26ddd - old app version, 83af344 - new app version
         imagePullPolicy: Always
         name: bbqinventoryapp
         ports:
