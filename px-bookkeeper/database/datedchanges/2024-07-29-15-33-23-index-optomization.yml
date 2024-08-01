@@ -36,7 +36,7 @@ databaseChangeLog:
         tableName:  Warehouses
         validate:  true
     - addPrimaryKey:
-        clustered:  true
+        clustered:  false
         columnNames:  Location
         constraintName:  pk_warehouse_location
         tableName:  Warehouses
@@ -100,7 +100,7 @@ databaseChangeLog:
             tableName: Warehouses
             unique: false
             indexName: idx_warehouses_location_city_state
-            clustered: false
+            clustered: true
             columns:
               - column:
                   name: Location
