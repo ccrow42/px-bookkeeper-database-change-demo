@@ -2,7 +2,7 @@ databaseChangeLog:
 - changeSet:
     id: create-new-keys
     author: stephenatwell
-    ignore: true
+    ignore: false
     changes:
     - createIndex:
             tableName: Inventory
