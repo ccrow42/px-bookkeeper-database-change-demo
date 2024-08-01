@@ -78,7 +78,7 @@ databaseChangeLog:
             tableName: Inventory
             unique: false
             indexName: idx_warehousename_quantity_name
-            clustered: false
+            clustered: true
             unique: true
             associatedWith: primaryKey
             columns:
