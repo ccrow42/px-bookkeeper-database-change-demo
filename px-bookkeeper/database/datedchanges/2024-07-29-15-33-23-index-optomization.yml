@@ -40,23 +40,15 @@ databaseChangeLog:
             validate:  true
     - createIndex:
             tableName: Inventory
-            unique: false
-            indexName: idx_warehousename
-            clustered: false
-            columns:
-              - column:
-                  name: WarehouseName
-    - createIndex:
-            tableName: Inventory
             indexName: idx_warehousename_quantity_name
             clustered: false
             columns:
               - column:
+                  name: WarehouseName
+              - column:
                   name: Name
               - column:
                   name: Quantity
-              - column:
-                  name: WarehouseName
     - createIndex:
             tableName: Warehouses
             indexName: idx_location_city_state
