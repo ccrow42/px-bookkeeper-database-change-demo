@@ -8,20 +8,11 @@ databaseChangeLog:
         constraintName: PK__Warehous__3214EC27E991EA03
         dropIndex: true
         tableName:  Warehouses
-    - dropIndex:
-        indexName: PK__Inventor__3214EC27FD87BA6A
-        tableName: Inventory
     rollback: 
     -  addPrimaryKey:
         constraintName: PK__Warehous__3214EC27E991EA03
         columnNames: ID
         tableName:  Warehouses  
-    - createIndex:
-        indexName: PK__Inventor__3214EC27FD87BA6A
-        tableName: Inventory
-        clustered: true
-        unique: true
-        associatedWith: primaryKey
 - changeSet:
     id: create-new-keys
     ignore: false
