@@ -1,6 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    ignore: false
+    ignore: true
     id: drop-primary
     author: stephenatwell
     changes:
@@ -15,7 +15,7 @@ databaseChangeLog:
         tableName:  Warehouses  
 - changeSet:
     id: create-new-keys
-    ignore: false
+    ignore: true
     author: stephenatwell
     changes:
     -  addNotNullConstraint:
