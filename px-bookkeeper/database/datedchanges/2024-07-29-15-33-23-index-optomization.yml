@@ -40,7 +40,7 @@ databaseChangeLog:
             validate:  true
     - createIndex:
             tableName: Inventory
-            indexName: idx_warehousename_name_quantity
+            indexName: idx_warehousename_name_quantity_2
             clustered: false
             columns:
               - column:
