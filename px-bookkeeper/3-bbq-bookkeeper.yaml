@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-
   labels:
     app: bbqinventoryapp
   name: bbqbookeeper-web
@@ -25,6 +24,15 @@ spec:
         app: bbqinventoryapp
     spec:
       containers:
+      - name: load-generator
+        image: curlimages/curl:7.85.0
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            while true; do
+              curl -s localhost:8080/inventory-by-location?location=Seattle > /dev/null
+              sleep 0.05
+            done
       - env:
         - name: DB_INIT_USER
           value: sa
@@ -44,7 +52,13 @@ spec:
             secretKeyRef:
               key: DB_PASSWORD
               name: bbq-bookkeeper-secret
-        image: eshanks16/bbqbookkeeper:ea26ddd # ea26ddd - old app version, 83af344 - new app version
+        livenessProbe:
+          httpGet:
+            path: /inventory-by-location
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 2
+        image: eshanks16/bbqbookkeeper:83af344 # ea26ddd - old app version, 83af344 - new app version
         imagePullPolicy: Always
         name: bbqinventoryapp
         ports:

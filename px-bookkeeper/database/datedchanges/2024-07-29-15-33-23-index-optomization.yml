@@ -1,0 +1,63 @@
+databaseChangeLog:
+- changeSet:
+    ignore: false
+    id: drop-primary
+    author: stephenatwell
+    changes:
+    -  dropPrimaryKey:
+        constraintName: PK__Warehous__3214EC27E991EA03
+        dropIndex: true
+        tableName:  Warehouses
+    rollback: 
+    -  addPrimaryKey:
+        constraintName: PK__Warehous__3214EC27E991EA03
+        columnNames: ID
+        tableName:  Warehouses  
+- changeSet:
+    id: create-new-keys
+    ignore: false
+    author: stephenatwell
+    changes:
+    -  addNotNullConstraint:
+        columnName:  Location
+        columnDataType: nvarchar(50)
+        constraintName:  location_non_nullable
+        defaultNullValue:  newId()
+        tableName:  Warehouses
+        validate:  true
+    - addPrimaryKey:
+        clustered:  true
+        columnNames:  Location
+        constraintName:  pk_location
+        tableName:  Warehouses
+        validate:  true
+    - addForeignKeyConstraint:
+            basetableName: Inventory
+            baseColumnNames: WarehouseName
+            constraintName:  fk_WarehouseName
+            referencedTableName: Warehouses
+            referencedColumnNames: Location
+            validate:  true
+    - createIndex:
+            tableName: Inventory
+            indexName: idx_warehousename_name_quantity_2
+            clustered: false
+            columns:
+              - column:
+                  name: WarehouseName
+              - column:
+                  name: Name
+              - column:
+                  name: Quantity
+    - createIndex:
+            tableName: Warehouses
+            indexName: idx_location_city_state
+            clustered: false
+            columns:
+              - column:
+                  name: Location
+              - column:
+                  name: City
+              - column:
+                  name: State
+
