@@ -1,0 +1,39 @@
+pipeline:
+  name: Kubecon2024-Argo-BBQBookkeeper
+  identifier: Kubecon2024ArgoBBQBookkeeper
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Copy DB to Stage
+        identifier: Copy_DB_to_Stage
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: pxbbqprod
+          execution:
+            steps:
+              - step:
+                  type: K8sRollingDeploy
+                  name: K8sRollingDeploy_1
+                  identifier: K8sRollingDeploy_1
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+                  timeout: 10m
+            rollbackSteps: []
+          environment:
+            environmentRef: demo1
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: demo1bbqkeeper
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
