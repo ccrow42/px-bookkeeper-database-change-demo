@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1  
+kind: ApplicationSet  
+metadata:  
+  name: guestbook  
+spec:  
+  generators:  
+    - git:  
+        repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
+        revision: HEAD  
+        files:  
+        - path: "appsets-demo/cluster-config/**/config.json"  
+  template:  
+    metadata:  
+      name: '{{cluster.name}}-guestbook'
+      labels: 
+        harness.io/envRef: '{{envTag}}'
+        harness.io/serviceRef: '{{serviceTag}}'
+        harness.io/buildRef: '{{releaseTag}}'
+    spec:  
+      project: 15021935 
+      source:  
+        repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
+        targetRevision: HEAD  
+        path: "appsets-demo/apps/guestbook"  
+      destination:  
+        server: '{{cluster.address}}'  
+        namespace: default  
+      syncPolicy:  
+        automated: {}
