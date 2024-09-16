@@ -17,7 +17,7 @@ spec:
         harness.io/serviceRef: '{{serviceTag}}'
         harness.io/buildRef: '{{releaseTag}}'
     spec:  
-      project: 15021935 
+      project: "15021935"
       source:  
         repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
         targetRevision: HEAD  
