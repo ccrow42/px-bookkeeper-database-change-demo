@@ -13,9 +13,9 @@ spec:
     metadata:  
       name: '{{cluster.name}}-guestbook'
       labels: 
-        harness.io/envRef: '{{envTag}}'
-        harness.io/serviceRef: '{{serviceTag}}'
-        harness.io/buildRef: '{{releaseTag}}'
+        # harness.io/envRef: '{{envTag}}'
+        # harness.io/serviceRef: '{{serviceTag}}'
+        # harness.io/buildRef: '{{releaseTag}}'
     spec:  
       project: "15021935"
       source:  
