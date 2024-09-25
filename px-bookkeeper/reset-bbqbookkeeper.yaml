@@ -105,8 +105,8 @@ spec:
         volumeMounts:
         - name: mssql
           mountPath: "/var/opt/mssql"
-        - name: init-script
-          mountPath: "/var/opt/mssql/scripts"
+        #- name: init-script
+        #  mountPath: "/var/opt/mssql/scripts"
       volumes:
       - name: init-script
         configMap:
