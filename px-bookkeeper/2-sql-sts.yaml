@@ -51,7 +51,7 @@ spec:
         resources:
           requests:
             storage: 8Gi
-        storageClassName: px-db
+        storageClassName: px-csi-db
 ---
 apiVersion: v1
 kind: Service

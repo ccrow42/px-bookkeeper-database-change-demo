@@ -43,16 +43,16 @@ spec:
           - name: DB_PORT #MSSQL Port
             value: "1433"
           - name: DB_USER #Username to use for connection to BBQBookeeper Database. Will be created if does not exist.
-            value: "sa"
+            value: "porxie"
           - name: DB_PASSWORD #Password to use for connection to BBQBookeeper Database. Will be created if does not exist.
-            value: "Porxie24"
+            value: "P0rx!e24"
         livenessProbe:
           httpGet:
             path: /inventory-by-location
             port: 8080
           initialDelaySeconds: 1
           periodSeconds: 2
-        image: eshanks16/bbqbookkeeper:83af344 # ea26ddd - old app version, 83af344 - new app version 
+        image: eshanks16/bbqbookkeeper:ea26ddd # ea26ddd - old app version, 83af344 - new app version 
         imagePullPolicy: Always
         name: bbqinventoryapp
         ports:
@@ -66,3 +66,19 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookeeper-web
+  namespace: bbq-bookkeeper
+  labels:
+    app: bbqinventoryapp
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30001
+  selector:
+    app: bbqinventoryapp
+  type: LoadBalancer
