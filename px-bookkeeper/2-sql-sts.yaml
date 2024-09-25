@@ -67,7 +67,7 @@ spec:
     name: tcpsql
   selector:
     app: mssql
-  type: ClusterIP
+  type: LoadBalancer
 ---
 apiVersion: v1
 kind: ConfigMap
