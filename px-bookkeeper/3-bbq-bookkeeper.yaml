@@ -34,24 +34,18 @@ spec:
               sleep 0.05
             done
       - env:
-        - name: DB_INIT_USER
-          value: sa
-        - name: DB_INIT_PASS
-          valueFrom:
-            secretKeyRef:
-              key: SA_PASSWORD
-              name: bbq-bookkeeper-secret
-        - name: DB_SERVER
-          value: mssql
-        - name: DB_PORT
-          value: "1433"
-        - name: DB_USER
-          value: porxie
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: DB_PASSWORD
-              name: bbq-bookkeeper-secret
+          - name: DB_INIT_USER #SA or admin Username for MSSQL
+            value: "porxie"
+          - name: DB_INIT_PASS #SA or admin Password for MSSQL
+            value: "Porxie24"
+          - name: DB_SERVER #MSSQL DNS or IP Address
+            value: "mssql" 
+          - name: DB_PORT #MSSQL Port
+            value: "1433"
+          - name: DB_USER #Username to use for connection to BBQBookeeper Database. Will be created if does not exist.
+            value: "porxie"
+          - name: DB_PASSWORD #Password to use for connection to BBQBookeeper Database. Will be created if does not exist.
+            value: "P0rx!e24"
         livenessProbe:
           httpGet:
             path: /inventory-by-location
