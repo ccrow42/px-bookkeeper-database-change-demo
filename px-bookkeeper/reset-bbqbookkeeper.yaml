@@ -100,7 +100,7 @@ spec:
             value: "Express"
         resources:
           limits:
-            cpu: 0.1
+            cpu: 100m
             memory: 1Gi
         volumeMounts:
         - name: mssql
@@ -110,6 +110,7 @@ spec:
       volumes:
       - name: init-script
         configMap:
+          defaultMode: 420
           name: mssql-init-script
   volumeClaimTemplates:
     - metadata:
