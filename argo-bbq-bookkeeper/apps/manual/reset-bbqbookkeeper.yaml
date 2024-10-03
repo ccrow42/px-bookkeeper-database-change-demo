@@ -52,7 +52,7 @@ spec:
             port: 8080
           initialDelaySeconds: 1
           periodSeconds: 2
-        image: eshanks16/bbqbookkeeper:83af344 # ea26ddd - old app version, 83af344 - new app version 
+        image: eshanks16/bbqbookkeeper:ea26ddd # ea26ddd - old app version, 83af344 - new app version
         imagePullPolicy: Always
         name: bbqinventoryapp
         ports:
@@ -67,18 +67,90 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
 ---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mssql 
+  namespace: bbq-bookkeeper-argo
+spec:
+  serviceName: "mssql" 
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: mssql  
+  template:
+    metadata:
+      labels:
+        app: mssql 
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+      - name: mssql 
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+        - containerPort: 1433
+          name: tcpsql
+        env:
+          - name: ACCEPT_EULA
+            value: "Y"
+          - name: SA_PASSWORD
+            value: "Porxie24"
+          - name: MSSQL_PID
+            value: "Express"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 1Gi
+        volumeMounts:
+        - name: mssql
+          mountPath: "/var/opt/mssql"
+        #- name: init-script
+        #  mountPath: "/var/opt/mssql/scripts"
+      volumes:
+      - name: init-script
+        configMap:
+          defaultMode: 420
+          name: mssql-init-script
+  volumeClaimTemplates:
+    - metadata:
+        name: mssql
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+        storageClassName: px-csi-db
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: bookeeper-web
+  name: mssql
   namespace: bbq-bookkeeper-argo
   labels:
-    app: bbqinventoryapp
+    app: mssql
 spec:
   ports:
-  - port: 8080
-    targetPort: 8080
-    nodePort: 30001
+  - port: 1433
+    targetPort: 1433
+    name: tcpsql
   selector:
-    app: bbqinventoryapp
+    app: mssql
   type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mssql-init-script
+  namespace: bbq-bookkeeper-argo
+data:
+  init-db.sql: |
+    IF NOT EXISTS (
+        SELECT [name]
+        FROM sys.databases
+        WHERE [name] = N'BBQInventory'
+    )
+    BEGIN
+        CREATE DATABASE [BBQInventory];
+    END;
