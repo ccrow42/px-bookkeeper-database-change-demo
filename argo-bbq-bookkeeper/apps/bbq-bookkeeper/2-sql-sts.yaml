@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mssql 
-  namespace: bbq-bookkeeper
+  namespace: bbq-bookkeeper-argo
 spec:
   serviceName: "mssql" 
   replicas: 1 
@@ -26,10 +26,7 @@ spec:
           - name: ACCEPT_EULA
             value: "Y"
           - name: SA_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: bbq-bookkeeper-secret
-                key: SA_PASSWORD
+            value: "Porxie24"
           - name: MSSQL_PID
             value: "Express"
         resources:
@@ -54,7 +51,7 @@ spec:
         resources:
           requests:
             storage: 8Gi
-        storageClassName: px-db
+        storageClassName: px-csi-db
 ---
 apiVersion: v1
 kind: Service
@@ -70,7 +67,7 @@ spec:
     name: tcpsql
   selector:
     app: mssql
-  type: ClusterIP
+  type: LoadBalancer
 ---
 apiVersion: v1
 kind: ConfigMap

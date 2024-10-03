@@ -8,10 +8,10 @@ spec:
         repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
         revision: HEAD  
         files:  
-        - path: "appsets-demo/cluster-config/**/config.json"  
+        - path: "argo-bbq-bookkeeper/cluster-config/**/config.json"  
   template:  
     metadata:  
-      name: '{{cluster.name}}-guestbook'
+      name: '{{cluster.name}}-bbqbookkeeper'
       labels: 
         # harness.io/envRef: '{{envTag}}'
         # harness.io/serviceRef: '{{serviceTag}}'
@@ -21,7 +21,7 @@ spec:
       source:  
         repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
         targetRevision: HEAD  
-        path: "appsets-demo/apps/guestbook"  
+        path: "argo-bbq-bookkeeper/apps/guestbook"  
       destination:  
         server: '{{cluster.address}}'  
         namespace: default  
