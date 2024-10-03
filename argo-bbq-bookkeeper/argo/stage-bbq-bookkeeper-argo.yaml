@@ -6,7 +6,7 @@ metadata:
 spec:
   destination:
     namespace: default
-    server: https://rancher.lan.ccrow.org/k8s/clusters/c-m-8xkzpnl2
+    server: in-cluster
   project: "15021935"
   source:
     path: argo-bbq-bookkeeper/apps/bbq-bookkeeper
