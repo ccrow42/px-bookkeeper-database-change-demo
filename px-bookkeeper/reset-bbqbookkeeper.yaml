@@ -100,16 +100,17 @@ spec:
             value: "Express"
         resources:
           limits:
-            cpu: 0.1
+            cpu: 100m
             memory: 1Gi
         volumeMounts:
         - name: mssql
           mountPath: "/var/opt/mssql"
-        - name: init-script
-          mountPath: "/var/opt/mssql/scripts"
+        #- name: init-script
+        #  mountPath: "/var/opt/mssql/scripts"
       volumes:
       - name: init-script
         configMap:
+          defaultMode: 420
           name: mssql-init-script
   volumeClaimTemplates:
     - metadata:

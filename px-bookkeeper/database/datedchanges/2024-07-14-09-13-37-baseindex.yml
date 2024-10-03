@@ -14,3 +14,9 @@ databaseChangeLog:
                   name: WarehouseName
               - column:
                   name: Quantity
+-  changeSet:
+    id:  initialtag
+    author:  liquibase-docs
+    changes:
+    -  tagDatabase:
+        tag:  base-1
