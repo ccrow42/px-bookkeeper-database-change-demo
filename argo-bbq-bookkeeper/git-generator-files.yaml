@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1  
 kind: ApplicationSet  
 metadata:  
-  name: guestbook  
+  name: bbq-bookkeeper-argo  
 spec:  
   generators:  
     - git:  
@@ -21,7 +21,7 @@ spec:
       source:  
         repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
         targetRevision: HEAD  
-        path: "argo-bbq-bookkeeper/apps/guestbook"  
+        path: "argo-bbq-bookkeeper/apps/bbq-bookkeeper"  
       destination:  
         server: '{{cluster.address}}'  
         namespace: default  
