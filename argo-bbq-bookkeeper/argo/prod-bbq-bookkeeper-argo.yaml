@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-bbqbookkeeper
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    server: https://rancher.lan.ccrow.org/k8s/clusters/c-m-9xczsxwn
+  project: "15021935"
+  source:
+    path: argo-bbq-bookkeeper/apps/bbq-bookkeeper
+    repoURL: https://github.com/ccrow42/px-bookkeeper-database-change-demo.git
+    targetRevision: HEAD
