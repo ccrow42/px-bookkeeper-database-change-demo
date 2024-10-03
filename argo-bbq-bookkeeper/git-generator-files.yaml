@@ -25,5 +25,4 @@ spec:
       destination:  
         server: '{{cluster.address}}'  
         namespace: default  
-      syncPolicy:  
-        automated: {}
+      syncPolicy: {}
