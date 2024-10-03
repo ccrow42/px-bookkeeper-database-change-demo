@@ -57,7 +57,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mssql
-  namespace: bbq-bookkeeper
+  namespace: bbq-bookkeeper-argo
   labels:
     app: mssql
 spec:
@@ -73,7 +73,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mssql-init-script
-  namespace: bbq-bookkeeper
+  namespace: bbq-bookkeeper-argo
 data:
   init-db.sql: |
     IF NOT EXISTS (
