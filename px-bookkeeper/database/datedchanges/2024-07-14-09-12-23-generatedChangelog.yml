@@ -77,3 +77,9 @@ databaseChangeLog:
             name: Location
             type: nvarchar(50)
         tableName: Warehouses  
+-  changeSet:
+    id:  initialtag-0
+    author:  liquibase-docs
+    changes:
+    -  tagDatabase:
+        tag:  base-0
