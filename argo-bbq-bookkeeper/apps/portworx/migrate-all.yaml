@@ -5,8 +5,8 @@ metadata:
   namespace: portworx
 spec:
   clusterPair: demo
-  includeResources: false
-  startApplications: false
+  includeResources: true
+  startApplications: true
   namespaces:
     - bbq-bookkeeper-argo
   purgeDeletedResources: false
