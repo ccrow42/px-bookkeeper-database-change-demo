@@ -23,5 +23,5 @@ databaseChangeLog:
 - changeSet:
     id: quick test
     author: stephenatwell
-    changes: []
-    rollback: []
+    changes:
+    - empty: {}
