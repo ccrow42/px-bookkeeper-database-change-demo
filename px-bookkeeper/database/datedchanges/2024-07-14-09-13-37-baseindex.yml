@@ -20,3 +20,8 @@ databaseChangeLog:
     changes:
     -  tagDatabase:
         tag:  base-1
+- changeSet:
+    id: quick test
+    author: stephenatwell
+    changes: []
+    rollback: []
