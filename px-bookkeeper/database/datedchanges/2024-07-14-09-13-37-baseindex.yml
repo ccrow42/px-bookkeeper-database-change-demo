@@ -20,6 +20,4 @@ databaseChangeLog:
     changes:
     -  tagDatabase:
         tag:  base-1
-    rollback:
-    -  tagDatabase:
-        tag:  base-1
+    rollback: []
