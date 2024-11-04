@@ -21,7 +21,7 @@ databaseChangeLog:
     -  tagDatabase:
         tag:  base-1
 - changeSet:
-    id: quick test
+    id: quick_test
     author: stephenatwell
     changes:
     - empty: {}
