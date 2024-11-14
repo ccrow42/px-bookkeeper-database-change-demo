@@ -1,0 +1,562 @@
+pipeline:
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: migrate-database
+        identifier: migratedatabase
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: prodtostagingmigrate
+          environment:
+            environmentRef: demo1
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: demo1bbqkeeper
+          execution:
+            steps:
+              - parallel:
+                  - step:
+                      type: ShellScript
+                      name: prod_delete_migration_object
+                      identifier: prod_delete_migration_object
+                      spec:
+                        shell: Bash
+                        executionTarget: {}
+                        delegateSelectors:
+                          - demo1-cluster
+                        source:
+                          type: Inline
+                          spec:
+                            script: kubectl -n portworx delete migration migrate-bbq-bookkeeper-argo --ignore-not-found=true -o name
+                        environmentVariables: []
+                        outputVariables: []
+                      timeout: 10m
+                  - step:
+                      type: ShellScript
+                      name: stage_scale_down_mssql
+                      identifier: stage_scale_down_mssql
+                      spec:
+                        shell: Bash
+                        executionTarget: {}
+                        delegateSelectors:
+                          - demo2-cluster
+                        source:
+                          type: Inline
+                          spec:
+                            script: kubectl -n bbq-bookkeeper-argo scale sts mssql --replicas=0
+                        environmentVariables: []
+                        outputVariables: []
+                      timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: wait for db shutdown
+                  identifier: wait_for_db_shutdown
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: sleep 60
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: K8sApply
+                  name: apply_migration
+                  identifier: apply_migration
+                  spec:
+                    skipDryRun: false
+                    skipSteadyStateCheck: false
+                    skipRendering: false
+                    overrides: []
+                    manifestSource:
+                      type: K8sManifest
+                      spec:
+                        store:
+                          type: Github
+                          spec:
+                            connectorRef: pxbookkeeperdatabasechangedemo
+                            paths:
+                              - argo-bbq-bookkeeper/apps/portworx/migrate.yaml
+                            gitFetchType: Branch
+                            branch: main
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: prod_wait_for_migration
+                  identifier: prod_wait_for_migration
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    delegateSelectors:
+                      - demo1-cluster
+                    source:
+                      type: Inline
+                      spec:
+                        script: kubectl wait -n=portworx migration/migrate-bbq-bookkeeper-argo --for=jsonpath={.status.stage}=Final --timeout=10m
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: stage_scale_up_mssql
+                  identifier: stage_scale_up_mssql
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    delegateSelectors:
+                      - demo2-cluster
+                    source:
+                      type: Inline
+                      spec:
+                        script: kubectl -n bbq-bookkeeper-argo scale sts mssql --replicas=1
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: stage_wait_ready_mssql
+                  identifier: stage_wait_ready_mssql
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: kubectl -n bbq-bookkeeper-argo wait sts/mssql --for=jsonpath={.status.availableReplicas}=1 --timeout=10m
+                    environmentVariables: []
+                    outputVariables: []
+                    delegateSelectors:
+                      - demo2-cluster
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: Restart Staging Deployment
+                  identifier: Restart_Staging_Deployment
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    delegateSelectors:
+                      - demo2-cluster
+                    source:
+                      type: Inline
+                      spec:
+                        script: kubectl -n bbq-bookkeeper-argo  rollout restart deployment/bbqbookeeper-web
+                    environmentVariables: []
+                    outputVariables: []
+                    outputAlias:
+                      scope: Stage
+                      key: aoeu
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: send deploy event
+                  identifier: send_deploy_event
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: |+
+                          #date -d"$start_time" %1$tFT%1$tT%1$tZ
+                          #!/bin/bash
+
+                          # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                          timestamp_seconds=$(($start_time / 1000))
+
+                          # Format the date in the desired format
+                          formatted_date=$(date -u -d @"$timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                          # Output the formatted date
+                          echo $formatted_date
+
+                          # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                          end_timestamp_seconds=$(($end_time / 1000))
+
+                          # Format the date in the desired format
+                          end_formatted_date=$(date -u -d @"$end_timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                          # Output the formatted date
+                          echo $end_formatted_date
+
+
+
+                          curl -X POST -d "[
+                            {
+                              \"startDateTime\": \"$formatted_date\",    \"databaseTargetId\": 1,
+                              \"eventTypeId\": 2,
+                              \"title\": \"$title\",    \"endDateTime\": \"$end_formatted_date\",    \"colourCode\": \"#FF0000\",    \"description\": \"\",    \"detailsUrl\": \"$url\"}]" http://util1.lan.ccrow.org:9090/archiver/rest/v1/event -H "Content-Type: application/json" -u demouser:DBM@rl1nP0rtw0rxH@rness
+
+
+
+                    environmentVariables:
+                      - name: start_time
+                        type: String
+                        value: <+execution.steps.stage_scale_down_mssql.startTs>
+                      - name: end_time
+                        type: String
+                        value: <+execution.steps.Wait_for_DB_To_Start.endTs>
+                      - name: title
+                        type: String
+                        value: prod->Stage migration End
+                      - name: url
+                        type: String
+                        value: <+pipeline.executionUrl>
+                    outputVariables: []
+                    delegateSelectors:
+                      - demo2-cluster
+                  timeout: 10m
+                  when:
+                    stageStatus: Success
+                    condition: "false"
+            rollbackSteps: []
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+    - stage:
+        name: Update DB Schema
+        identifier: Update_DB_Schema
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - stepGroup:
+                  name: Database
+                  identifier: Database
+                  steps:
+                    - step:
+                        type: DBSchemaApply
+                        name: Apply Migrations
+                        identifier: Apply_Migrations
+                        spec:
+                          connectorRef: account.harnessImage
+                          resources:
+                            limits:
+                              memory: 1Gi
+                              cpu: "1"
+                          dbSchema: Book_Keeper
+                          dbInstance: stagingargo
+                          tag: <+pipeline.variables.update_tag>
+                        timeout: 10m
+                    - step:
+                        type: Run
+                        name: notify of change
+                        identifier: notify_of_change
+                        spec:
+                          connectorRef: account.harnessImage
+                          image: kh4sh3i/alpine-curl:latest
+                          shell: Sh
+                          command: |-
+                            #date -d"$start_time" %1$tFT%1$tT%1$tZ
+                            #!/bin/bash
+
+                            # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                            timestamp_seconds=$(($start_time / 1000))
+
+                            # Format the date in the desired format
+                            formatted_date=$(date -u -d @"$timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                            # Output the formatted date
+                            echo $formatted_date
+
+                            # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                            end_timestamp_seconds=$(($end_time / 1000))
+
+                            # Format the date in the desired format
+                            end_formatted_date=$(date -u -d @"$end_timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                            # Output the formatted date
+                            echo $end_formatted_date
+
+
+
+                            curl -X POST -d "[
+                              {
+                                \"startDateTime\": \"$formatted_date\",    \"databaseTargetId\": 1,
+                                \"eventTypeId\": 2,
+                                \"title\": \"$title\",    \"endDateTime\": \"$end_formatted_date\",    \"colourCode\": \"#FF0000\",    \"description\": \"\",    \"detailsUrl\": \"$url\"}]" http://util1.lan.ccrow.org:9090/archiver/rest/v1/event -H "Content-Type: application/json" -u demouser:DBM@rl1nP0rtw0rxH@rness
+                          envVariables:
+                            start_time: <+execution.steps.Database.steps.Apply_Migrations.startTs>
+                            end_time: <+execution.steps.Database.steps.Apply_Migrations.endTs>
+                            title: DBUpdate:<+pipeline.variables.update_tag>
+                            url: <+pipeline.executionUrl>
+                          outputVariables:
+                            - name: formatted_date
+                              type: String
+                              value: formatted_date
+                            - name: end_formatted_date
+                              type: String
+                              value: end_formatted_date
+                          imagePullPolicy: IfNotPresent
+                  stepGroupInfra:
+                    type: KubernetesDirect
+                    spec:
+                      connectorRef: demo2
+            rollbackSteps: []
+          serviceDependencies: []
+        tags: {}
+    - stage:
+        name: Pause for Demo
+        identifier: Pause_for_Demo
+        description: ""
+        type: Approval
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: approve
+                  identifier: approve
+                  type: HarnessApproval
+                  timeout: 1d
+                  spec:
+                    approvalMessage: |-
+                      Please review the following information
+                      and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                      userGroups:
+                        - account._account_all_users
+                    isAutoRejectEnabled: false
+                    approverInputs: []
+        tags: {}
+        when:
+          pipelineStatus: Success
+    - stage:
+        name: deploy BBQ Book Keeper - new image version
+        identifier: deploy_BBQ_Book_Keeper
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          environment:
+            environmentRef: demo2
+            deployToAll: false
+            gitOpsClusters:
+              - identifier: demo2
+                agentIdentifier: demo2
+          execution:
+            steps:
+              - step:
+                  type: GitOpsSync
+                  name: GitOpsSync_1
+                  identifier: GitOpsSync_1
+                  spec:
+                    prune: false
+                    dryRun: false
+                    applyOnly: false
+                    forceApply: true
+                    applicationsList:
+                      - applicationName: stage-bbqbookkeeper
+                        agentId: demo2
+                    retryStrategy:
+                      limit: 2
+                      baseBackoffDuration: 5s
+                      increaseBackoffByFactor: 2
+                      maxBackoffDuration: 3m5s
+                    retry: true
+                    syncOptions:
+                      skipSchemaValidation: false
+                      autoCreateNamespace: false
+                      pruneResourcesAtLast: false
+                      applyOutOfSyncOnly: false
+                      replaceResources: true
+                      prunePropagationPolicy: foreground
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: send deploy event
+                  identifier: send_deploy_event
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: |+
+                          #date -d"$start_time" %1$tFT%1$tT%1$tZ
+                          #!/bin/bash
+
+                          # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                          timestamp_seconds=$(($start_time / 1000))
+
+                          # Format the date in the desired format
+                          formatted_date=$(date -u -d @"$timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                          # Output the formatted date
+                          echo $formatted_date
+
+                          # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                          end_timestamp_seconds=$(($end_time / 1000))
+
+                          # Format the date in the desired format
+                          end_formatted_date=$(date -u -d @"$end_timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                          # Output the formatted date
+                          echo $end_formatted_date
+
+
+
+                          curl -X POST -d "[
+                            {
+                              \"startDateTime\": \"$formatted_date\",    \"databaseTargetId\": 1,
+                              \"eventTypeId\": 2,
+                              \"title\": \"$title\",    \"endDateTime\": \"$end_formatted_date\",    \"colourCode\": \"#FF0000\",    \"description\": \"\",    \"detailsUrl\": \"$url\"}]" http://util1.lan.ccrow.org:9090/archiver/rest/v1/event -H "Content-Type: application/json" -u demouser:DBM@rl1nP0rtw0rxH@rness
+
+
+
+                    environmentVariables:
+                      - name: start_time
+                        type: String
+                        value: <+execution.steps.GitOpsSync_1.startTs>
+                      - name: end_time
+                        type: String
+                        value: <+execution.steps.GitOpsSync_1.endTs>
+                      - name: title
+                        type: String
+                        value: "deploy: <+service.name>"
+                      - name: url
+                        type: String
+                        value: <+pipeline.executionUrl>
+                    outputVariables: []
+                    delegateSelectors:
+                      - demo2-cluster
+                  timeout: 10m
+              - step:
+                  type: HarnessApproval
+                  name: Rollback check
+                  identifier: HarnessApproval_1
+                  spec:
+                    approvalMessage: Is new version stable, or should we rollback?
+                    includePipelineExecutionHistory: true
+                    isAutoRejectEnabled: false
+                    approvers:
+                      userGroups:
+                        - account._account_all_users
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                    approverInputs: []
+                  timeout: 1d
+            rollbackSteps:
+              - step:
+                  type: ShellScript
+                  name: Rollback application
+                  identifier: Rollback_application
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    delegateSelectors:
+                      - demo2-cluster
+                    source:
+                      type: Inline
+                      spec:
+                        script: "kubectl rollout undo -n=bbq-bookkeeper-argo deployment/bbqbookeeper-web "
+                    environmentVariables: []
+                    outputVariables: []
+                    includeInfraSelectors: false
+                  timeout: 10m
+              - stepGroup:
+                  name: Database
+                  identifier: Database
+                  steps:
+                    - step:
+                        type: DBSchemaRollback
+                        name: Rollback Schema
+                        identifier: Rollback_Schema
+                        spec:
+                          connectorRef: account.harnessImage
+                          resources:
+                            limits:
+                              memory: 1Gi
+                              cpu: "1"
+                          dbSchema: Book_Keeper
+                          dbInstance: stagingargo
+                          tag: <+pipeline.stages.Update_DB_Schema.spec.execution.steps.Database.steps.Apply_Migrations.output.preStartTag>
+                        timeout: 10m
+                    - step:
+                        type: Run
+                        name: notify of change
+                        identifier: notify_of_change
+                        spec:
+                          connectorRef: account.harnessImage
+                          image: kh4sh3i/alpine-curl:latest
+                          shell: Sh
+                          command: |-
+                            #date -d"$start_time" %1$tFT%1$tT%1$tZ
+                            #!/bin/bash
+
+                            # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                            timestamp_seconds=$(($start_time / 1000))
+
+                            # Format the date in the desired format
+                            formatted_date=$(date -u -d @"$timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                            # Output the formatted date
+                            echo $formatted_date
+
+                            # Convert the Unix timestamp to seconds (since it is in milliseconds)
+                            end_timestamp_seconds=$(($end_time / 1000))
+
+                            # Format the date in the desired format
+                            end_formatted_date=$(date -u -d @"$end_timestamp_seconds" +"%Y-%m-%dT%H:%M:%S.%3NZ")
+
+                            # Output the formatted date
+                            echo $end_formatted_date
+
+
+
+                            curl -X POST -d "[
+                              {
+                                \"startDateTime\": \"$formatted_date\",    \"databaseTargetId\": 1,
+                                \"eventTypeId\": 2,
+                                \"title\": \"$title\",    \"endDateTime\": \"$end_formatted_date\",    \"colourCode\": \"#FF0000\",    \"description\": \"\",    \"detailsUrl\": \"$url\"}]" http://util1.lan.ccrow.org:9090/archiver/rest/v1/event -H "Content-Type: application/json" -u demouser:DBM@rl1nP0rtw0rxH@rness
+                          envVariables:
+                            start_time: <+execution.rollbackSteps.Rollback_application.startTs>
+                            end_time: <+execution.rollbackSteps.Database.steps.Rollback_Schema.endTs>
+                            title: Rollback:<+pipeline.variables.update_tag>
+                            url: <+pipeline.executionUrl>
+                          outputVariables:
+                            - name: formatted_date
+                              type: String
+                              value: formatted_date
+                            - name: end_formatted_date
+                              type: String
+                              value: end_formatted_date
+                          imagePullPolicy: IfNotPresent
+                  stepGroupInfra:
+                    type: KubernetesDirect
+                    spec:
+                      connectorRef: demo2
+          gitOpsEnabled: true
+          service:
+            serviceRef: stagebbqbookkeeper
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+        delegateSelectors:
+          - demo2-cluster
+  variables:
+    - name: update_tag
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+  identifier: bbqbookkeeperargo
+  name: bbq-bookkeeper-argo
