@@ -1,0 +1,11 @@
+inputSet:
+  name: git config
+  identifier: git_config
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: bbqbookkeeperargo
+    variables:
+      - name: update_tag
+        type: String
+        value: <+trigger.commitSha>
